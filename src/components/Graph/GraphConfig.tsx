@@ -67,77 +67,29 @@ const GraphSet: React.FC<GraphSetProps> = ({ graphConfiguration, solutionSCC, so
             edges: []
         }
 
-        for (var i = 0; i < nodeCount; i++) {
-            // Graph element
-            tempGraph.nodes.push({
-                id: graphConfiguration[i][0],
-                label: "Node " + graphConfiguration[i][0],
-                color: {
-                    background: 'white',
-                    border: "#5358e2",
-                    highlight: "#5358e2"
-                },
-                labelHighlightBold: false,
-                shape: "circle",
-            })
+        if (solutionSCC.length === 0 && solutionBridges.length === 0) {
+            for (var i = 0; i < nodeCount; i++) {
+                // Graph element
+                tempGraph.nodes.push({
+                    id: graphConfiguration[i][0],
+                    label: "Node " + graphConfiguration[i][0],
+                    color: {
+                        background: 'white',
+                        border: "#5358e2",
+                        highlight: "#5358e2"
+                    },
+                    labelHighlightBold: false,
+                    shape: "circle",
+                })
 
-            // Setup edge
-            for (var j = 0; j < graphConfiguration[i][1].length; j++) {
-                let tempEdge;
-                if (solutionSCC.length !== 0 || solutionBridges.length !== 0) {
+                // Setup edge
+                let tempEdge : Edge;
+                for (var j = 0; j < graphConfiguration[i][1].length; j++) {
                     tempEdge = {
                         from: graphConfiguration[i][0],
                         to: graphConfiguration[i][1][j],
                         arrows: {
-                            to: true,
-                        },
-                        physics: false,
-                        color: {
-                            color: "#feae33",
-                            highlight: "#feae33"
-                        },
-                        labelHighlightBold: true,
-                        selectionWidth: 0,
-                        smooth: {enabled: true,  type: 'curvedCW', roundness: 0.25}
-                    }
-
-                    // Check the solution
-                    // let sortedAdj1 = sortFirstAndSecond1(solution);
-                    // for (let p = 0; p < sortedAdj1.length; p++) {
-                    //     if (sortedAdj1[p][0] == i && sortedAdj1[p][1] == j) {
-                    //         tempEdge.color.color = "#dc2626";
-                    //     }
-                    // }
-                    // let sortedAdj2 = sortFirstAndSecond2(solution);
-                    // for (let p = 0; p < sortedAdj2.length; p++) {
-                    //     if (sortedAdj2[p][0] == i && sortedAdj2[p][1] == j) {
-                    //         tempEdge.color.color = "#dc2626";
-                    //     }
-                    // }
-
-                    // if (clusterRemove) {
-                    //     let arrRemove = clusterRemove.map(obj => [obj.src, obj.dest, obj.weight]);
-                    //     // Check the clusterRemove
-                    //     let sortedCluster1 = sortFirstAndSecond1(arrRemove);
-                    //     for (let p = 0; p < sortedCluster1.length; p++) {
-                    //         if (sortedCluster1[p][0] == i && sortedCluster1[p][1] == j) {
-                    //             tempEdge.color.color = "#e2e8f0";
-                    //         }
-                    //     }
-                    //     let sortedCluster2 = sortFirstAndSecond2(arrRemove);
-                    //     for (let p = 0; p < sortedCluster2.length; p++) {
-                    //         if (sortedCluster2[p][0] == i && sortedCluster2[p][1] == j) {
-                    //             tempEdge.color.color = "#e2e8f0";
-                    //         }
-                    //     }
-                    // }
-
-                } else {
-                    tempEdge = {
-                        from: graphConfiguration[i][0],
-                        to: graphConfiguration[i][1][j],
-                        arrows: {
-                            to: true,
+                            to: algorithm === 1 ? true : false,
                         },
                         physics: false,
                         color: {
@@ -146,11 +98,56 @@ const GraphSet: React.FC<GraphSetProps> = ({ graphConfiguration, solutionSCC, so
                         },
                         labelHighlightBold: true,
                         selectionWidth: 0,
+                        smooth: algorithm === 1 ? {enabled: true,  type: 'curvedCW', roundness: 0.25} : {enabled: false,  type: '', roundness: 0}
+                    }
+
+                    tempGraph.edges.push(tempEdge);
+                }
+            }
+        } else if (solutionSCC.length !== 0) {
+            let colorlist = ["#ce76fe", "#ed6f71", "#feae33", "#5358e2", "#f5f7fb"];
+
+            // Nodes
+            for (var i = 0; i < solutionSCC.length; i++) {
+                for (var j = 0; j < solutionSCC[i].length; j++) {
+                    // Graph element
+                    tempGraph.nodes.push({
+                        id: solutionSCC[i][j],
+                        label: "Node " + solutionSCC[i][j],
+                        color: {
+                            background: colorlist[i % 5],
+                            border: colorlist[i % 5],
+                            highlight: colorlist[i % 5]
+                        },
+                        labelHighlightBold: false,
+                        shape: "circle",
+                    })
+                }
+            }
+
+            // Edges
+            for (var i = 0; i < nodeCount; i++) {
+                // Setup edge
+                let tempEdge : Edge;
+                for (var j = 0; j < graphConfiguration[i][1].length; j++) {
+                    tempEdge = {
+                        from: graphConfiguration[i][0],
+                        to: graphConfiguration[i][1][j],
+                        arrows: {
+                            to: true,
+                        },
+                        physics: false,
+                        color: {
+                            color: "black",
+                            highlight: "black"
+                        },
+                        labelHighlightBold: true,
+                        selectionWidth: 0,
                         smooth: {enabled: true,  type: 'curvedCW', roundness: 0.25}
                     }
-                }
 
-                tempGraph.edges.push(tempEdge);
+                    tempGraph.edges.push(tempEdge);
+                }
             }
         }
         
