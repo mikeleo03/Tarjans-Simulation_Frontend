@@ -19,14 +19,15 @@ function App() {
     // Program states
     const [configFile, setConfigFile] = useState<File>();
     const [graphConfig, setGraphConfig] = useState<[string, string[]][]>([]);
-    const [solutionSCC, setSolutionSCC] = useState<number[]>([]);
-    const [solutionBridges, setSolutionBridges] = useState<number[]>([]);
+    const [solutionSCC, setSolutionSCC] = useState<string[][]>([]);
+    const [solutionBridges, setSolutionBridges] = useState<string[][]>([]);
     const [algorithm, setAlgorithm] = useState(1);
     const [fromAdd, setFromAdd] = useState(0);
     const [toAdd, setToAdd] = useState(0);
     const [fromDel, setFromDel] = useState(0);
     const [toDel, setToDel] = useState(0);
     const [adjArray, setArray] = useState<string[]>([]);
+    const [time, setTime] = useState(-1);
 
     // Update the adjArray
     useEffect(() => {
@@ -167,19 +168,23 @@ function App() {
                                     <>
                                         {/* <h3>Total Weight : {(solution && solution.length === graphConfig.length - 1) && (calculateTotalWeight(solution))}</h3> */}
                                         <h3>List of SCC</h3>
-                                        {/* <div>
-                                            {(solution && solution.length === graphConfig.length - 1) ? (
-                                                solution.map((obj, index) => (
+                                        <h3>Execution time : </h3>
+                                        <h3>{(algorithm === 1 && time !== - 1) ? (time) : ("-")} ns</h3>
+                                        <div>
+                                            {(solutionSCC) ? (
+                                                solutionSCC.map((obj, index) => (
                                                     <div className="text-base" key={index}>
-                                                        Node {obj[0] + 1} - Node {obj[1] + 1} ({obj[2]})
+                                                        SCC-{index + 1} : {obj.join(', ')}
                                                     </div>
-                                            ))
-                                            ) : (<div className="text-base">No solution</div>)}
-                                        </div> */}
+                                            )
+                                            )) : (<div className="text-base">No solution</div>)}
+                                        </div>
                                     </>
                                 ) : (
                                     <>
                                         <h3>List of Bridges</h3>
+                                        <h3>Execution time : </h3>
+                                        <h3>{(algorithm === 2 && time !== - 1) ? (time) : ("-")} ns</h3>
                                         {/* <div>
                                             {(clusters && clusters.length === clusterNum) ? (
                                                 clusters.map((obj, index) => (
@@ -195,7 +200,7 @@ function App() {
                         </div>
                     </div>
                     <div className="text-left flex flex-col w-1/4 p-8 bg-primaryGray rounded-r-xl">
-                        <Form algorithm={algorithm} setAlgorithm={setAlgorithm} setConfigFile={setConfigFile} setGraphConfig={setGraphConfig} graphConfig={graphConfig} setSolutionSCC={setSolutionSCC} setSolutionBridges={setSolutionBridges} />
+                        <Form algorithm={algorithm} setAlgorithm={setAlgorithm} setConfigFile={setConfigFile} setGraphConfig={setGraphConfig} graphConfig={graphConfig} setSolutionSCC={setSolutionSCC} setSolutionBridges={setSolutionBridges} adjArray={adjArray} setTime={setTime}/>
                     </div>
                 </div>
             </div>

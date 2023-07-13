@@ -4,8 +4,8 @@ import { v4 as uuid } from 'uuid';
 
 interface GraphSetProps {
     graphConfiguration: [string, string[]][];
-    solutionSCC: number[];
-    solutionBridges: number[];
+    solutionSCC: string[][];
+    solutionBridges: string[][];
     algorithm: number;
 }
 

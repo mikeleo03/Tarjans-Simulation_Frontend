@@ -11,12 +11,14 @@ interface FormProps {
     setConfigFile : (value : File) => void;
     setGraphConfig : (value : [string, string[]][]) => void;
     graphConfig : [string, string[]][];
-    setSolutionSCC : (value : number[]) => void;
-    setSolutionBridges : (value : number[]) => void;
+    setSolutionSCC : (value : string[][]) => void;
+    setSolutionBridges : (value : string[][]) => void;
+    adjArray : string[];
+    setTime : (value : number) => void;
 }
 
 // Compression Forms Component
-const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, setGraphConfig, graphConfig, setSolutionSCC, setSolutionBridges }) => {
+const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, setGraphConfig, graphConfig, setSolutionSCC, setSolutionBridges, adjArray, setTime }) => {
     const textRef = useRef<HTMLParagraphElement>(null);
     const infoRef = useRef<HTMLParagraphElement>(null);
 
@@ -73,6 +75,13 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
         if (graphConfig) {
             try {
                 if (algorithm === 1) {
+                    const convertedEdges: { [key: string]: string[] } = {};
+                    graphConfig.forEach(edge => {
+                        const sourceNode = edge[0];
+                        const targetNodes = edge[1];
+                        convertedEdges[sourceNode] = targetNodes;
+                    });
+
                     // Proses SCC
                     fetch(url + "/api/scc", {
                         method: "POST",
@@ -80,7 +89,8 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify({
-                            "graph": graphConfig,
+                            "nodes": adjArray,
+                            "edges": convertedEdges,
                         }),
                     })
                     .then((res) => res.json())
@@ -90,9 +100,12 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
                             toast.error(data.msg, {
                                 position: toast.POSITION.TOP_RIGHT
                             });
+                        } else {
+                            // Value retriving
+                            console.log(data);
+                            setSolutionSCC(data.value);
+                            data.time ? setTime(data.time) : setTime(0);
                         }
-                        
-                        setSolutionSCC(data.value);
                     });
                 } else {
                     // Proses bridges
@@ -102,7 +115,8 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify({
-                            "graph": graphConfig,
+                            "nodes": adjArray,
+                            "edges": graphConfig,
                         }),
                     })
                     .then((res) => res.json())
