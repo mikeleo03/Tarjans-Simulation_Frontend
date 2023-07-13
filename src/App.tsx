@@ -126,7 +126,7 @@ function App() {
                                 <h1 className='text-3xl font-bold'>Graph</h1>
                                 <h3 className='text-xl py-1.5 font-semibold text-primaryBlue'>Based on input result</h3>
                             </div>
-                            {graphConfig && 
+                            {(graphConfig.length !== 0) && 
                             <div className="w-2/3 flex flex-row gap-x-4 w-full">
                                 <div className="w-1/2 flex flex-row bg-primaryGray rounded-xl space-x-4 p-3">
                                     <div>
