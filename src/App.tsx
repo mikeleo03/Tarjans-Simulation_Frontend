@@ -6,7 +6,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import GraphSet from "./components/Graph/GraphConfig";
 import Form from "./components/Forms/Forms"
 import Dropdown from "./components/Dropdown/Dropdown";
-// import { calculateTotalWeight } from './helper/helper';
 
 const backgroundStyle = {
     backgroundColor : "#ECEEF9",
@@ -20,7 +19,8 @@ function App() {
     // Program states
     const [configFile, setConfigFile] = useState<File>();
     const [graphConfig, setGraphConfig] = useState<[string, string[]][]>([]);
-    const [solution, setSolution] = useState<number[]>([]);
+    const [solutionSCC, setSolutionSCC] = useState<number[]>([]);
+    const [solutionBridges, setSolutionBridges] = useState<number[]>([]);
     const [algorithm, setAlgorithm] = useState(1);
     const [fromAdd, setFromAdd] = useState(0);
     const [toAdd, setToAdd] = useState(0);
@@ -42,7 +42,8 @@ function App() {
     // Handlers
     const handleAddEdge = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-        setSolution([]);
+        setSolutionSCC([]);
+        setSolutionBridges([]);
 
         // The mechanism
         let edgeAlreadyExists = false;
@@ -79,7 +80,8 @@ function App() {
 
     const handleDeleteEdge = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-        setSolution([]);
+        setSolutionSCC([]);
+        setSolutionBridges([]);
       
         // The mechanism
         let edgeFound = false;
@@ -157,7 +159,7 @@ function App() {
                         </div>
                         <div className='h-5/6 p-5 rounded-lg bg-gray-200 flex flex-row w-full space-x-5'>
                             <div className='w-4/5'>
-                                {(configFile && graphConfig) ? (<GraphSet graphConfiguration={graphConfig} solution={solution} />) : (<div className="flex items-center justify-center h-full bg-gray-100 rounded-xl text-l">No file loaded.</div>)}
+                                {(configFile && graphConfig) ? (<GraphSet graphConfiguration={graphConfig} solutionSCC={solutionSCC} solutionBridges={solutionBridges} algorithm={algorithm} />) : (<div className="flex items-center justify-center h-full bg-gray-100 rounded-xl text-l">No file loaded.</div>)}
                             </div>
                             <div className='w-1/5 h-full'>
                                 <h1 className='text-xl font-bold'>Result</h1>
@@ -193,7 +195,7 @@ function App() {
                         </div>
                     </div>
                     <div className="text-left flex flex-col w-1/4 p-8 bg-primaryGray rounded-r-xl">
-                        <Form algorithm={algorithm} setAlgorithm={setAlgorithm} setConfigFile={setConfigFile} setGraphConfig={setGraphConfig} graphConfig={graphConfig} setSolution={setSolution} />
+                        <Form algorithm={algorithm} setAlgorithm={setAlgorithm} setConfigFile={setConfigFile} setGraphConfig={setGraphConfig} graphConfig={graphConfig} setSolutionSCC={setSolutionSCC} setSolutionBridges={setSolutionBridges} />
                     </div>
                 </div>
             </div>

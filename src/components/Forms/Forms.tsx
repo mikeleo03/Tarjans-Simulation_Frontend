@@ -3,7 +3,7 @@ import UploadImage from '../../assets/upload.png'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// import { convertMatrixToIntegers } from '../../helper/helper';
+const url = process.env.REACT_APP_BACKEND_URL_DEV;
 
 interface FormProps {
     algorithm: number;
@@ -11,17 +11,19 @@ interface FormProps {
     setConfigFile : (value : File) => void;
     setGraphConfig : (value : [string, string[]][]) => void;
     graphConfig : [string, string[]][];
-    setSolution : (value : number[]) => void;
+    setSolutionSCC : (value : number[]) => void;
+    setSolutionBridges : (value : number[]) => void;
 }
 
 // Compression Forms Component
-const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, setGraphConfig, graphConfig, setSolution }) => {
+const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, setGraphConfig, graphConfig, setSolutionSCC, setSolutionBridges }) => {
     const textRef = useRef<HTMLParagraphElement>(null);
     const infoRef = useRef<HTMLParagraphElement>(null);
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
-        setSolution([]);
+        setSolutionSCC([]);
+        setSolutionBridges([]);
         const file = e.target.files?.[0];
 
         if (file) {
@@ -63,48 +65,64 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
     };      
 
     // Do the process based on the algorithm
-    const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        setSolution([]);
+    const handleSubmit: React.MouseEventHandler<HTMLButtonElement> = async (event) => {
+        event.preventDefault();
+        setSolutionSCC([]);
+        setSolutionBridges([]);
 
         if (graphConfig) {
-            // Convert the graphConfig into matrix of integer
-            // let adjacency = convertMatrixToIntegers(graphConfig);
+            try {
+                if (algorithm === 1) {
+                    // Proses SCC
+                    fetch(url + "/api/scc", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            "graph": graphConfig,
+                        }),
+                    })
+                    .then((res) => res.json())
+                    .then((data) => {
+                        // Update state              
+                        if (data.status === false) {
+                            toast.error(data.msg, {
+                                position: toast.POSITION.TOP_RIGHT
+                            });
+                        }
+                        
+                        setSolutionSCC(data.value);
+                    });
+                } else {
+                    // Proses bridges
+                    fetch(url + "/api/bridges", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            "graph": graphConfig,
+                        }),
+                    })
+                    .then((res) => res.json())
+                    .then((data) => {
+                        // Update state              
+                        if (data.status === false) {
+                            toast.error(data.msg, {
+                                position: toast.POSITION.TOP_RIGHT
+                            });
+                        }
+                        
+                        setSolutionBridges(data.value);
+                    });
+                }
 
-            // Do the algorithm
-            if (algorithm === 1) {
-                // Do SCC
-                // let primMST = SCC(adjacency);
-                // primMST.length === graphConfig.length - 1 ? setSolution(primMST) : setSolution(null);
-            } else {
-                // Do Bridges
-                // let kruskalMST = Bridges(adjacency);
-                // kruskalMST.length === graphConfig.length - 1 ? setSolution(kruskalMST) : setSolution(null);
+            } catch (error) {
+                toast.error("Error processing : " + error, {
+                    position: toast.POSITION.TOP_RIGHT
+                });
             }
-        } else {
-            toast.error("You haven't load any .txt file, yet!", {
-                position: toast.POSITION.TOP_RIGHT
-            });
-        }
-    }
-
-    // Do the clustering
-    const handleClustering = (e : React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        setSolution([]);
-
-        if (graphConfig) {
-            // // Convert the graphConfig into matrix of integer
-            // let adjacency = convertMatrixToIntegers(graphConfig);
-            // // Do the algorithm
-            // let kruskalMST = Bridges(adjacency);
-            // kruskalMST.length === graphConfig.length - 1 ? setSolution(kruskalMST) : setSolution(null);
-            // let [clustersRes, removed] = clusterMST(kruskalMST, adjacency, clusterNum);
-
-            // // Handle result
-            // clustersRes.length === clusterNum ? setClusters(clustersRes) : setClusters(null);
-            // removed.length === clusterNum - 1 ? setClusterRemove(removed) : setClusterRemove(null);
-
         } else {
             toast.error("You haven't load any .txt file, yet!", {
                 position: toast.POSITION.TOP_RIGHT
@@ -201,11 +219,11 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
                             </label>
                             <div className="flex flex-col mt-2 grid grid-cols-2 space-x-2 rounded-lg bg-secondaryYellow p-1.5">
                                 <div>
-                                    <input type="radio" id="SCC" name="SCC" value="SCC" checked={algorithm === 1} onChange={() => {setAlgorithm(1); setSolution([]);}} className="peer hidden"></input>
+                                    <input type="radio" id="SCC" name="SCC" value="SCC" checked={algorithm === 1} onChange={() => {setAlgorithm(1); setSolutionSCC([]); setSolutionBridges([]);}} className="peer hidden"></input>
                                     <label htmlFor="SCC" className="text-sm block cursor-pointer select-none rounded-xl p-2 text-center peer-checked:bg-primaryBlue font-bold peer-checked:text-white h-full flex justify-center items-center">SCC</label>
                                 </div>
                                 <div>
-                                    <input type="radio" id="Bridges" name="Bridges" value="Bridges" checked={algorithm === 2} onChange={() => {setAlgorithm(2); setSolution([]);}} className="peer hidden"></input>
+                                    <input type="radio" id="Bridges" name="Bridges" value="Bridges" checked={algorithm === 2} onChange={() => {setAlgorithm(2); setSolutionSCC([]); setSolutionBridges([]);}} className="peer hidden"></input>
                                     <label htmlFor="Bridges" className="text-sm block cursor-pointer select-none rounded-xl p-2 text-center peer-checked:bg-primaryBlue font-bold peer-checked:text-white h-full flex justify-center items-center">Bridges</label>
                                 </div>
                             </div>

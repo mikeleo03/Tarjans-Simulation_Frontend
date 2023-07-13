@@ -1,11 +1,12 @@
 import Graph from "react-graph-vis";
 import { useState, useMemo, useEffect } from "react";
 import { v4 as uuid } from 'uuid';
-/* import { sortFirstAndSecond1, sortFirstAndSecond2 } from "../../helper/helper" */
 
 interface GraphSetProps {
     graphConfiguration: [string, string[]][];
-    solution: number[];
+    solutionSCC: number[];
+    solutionBridges: number[];
+    algorithm: number;
 }
 
 interface Node {
@@ -36,7 +37,7 @@ interface GraphElement {
     edges: Edge[];
 }
 
-const GraphSet: React.FC<GraphSetProps> = ({ graphConfiguration, solution }) => {
+const GraphSet: React.FC<GraphSetProps> = ({ graphConfiguration, solutionSCC, solutionBridges, algorithm }) => {
     // Basic screen configuration
     const [windowWidth, setWidth] = useState(window.innerWidth);
 
@@ -82,9 +83,8 @@ const GraphSet: React.FC<GraphSetProps> = ({ graphConfiguration, solution }) => 
 
             // Setup edge
             for (var j = 0; j < graphConfiguration[i][1].length; j++) {
-                console.log(graphConfiguration[i][0], graphConfiguration[i][1][j]);
                 let tempEdge;
-                if (solution.length !== 0) {
+                if (solutionSCC.length !== 0 || solutionBridges.length !== 0) {
                     tempEdge = {
                         from: graphConfiguration[i][0],
                         to: graphConfiguration[i][1][j],
@@ -156,10 +156,10 @@ const GraphSet: React.FC<GraphSetProps> = ({ graphConfiguration, solution }) => 
         
         setGraph(tempGraph);
 
-    }, [graphConfiguration, solution])
+    }, [graphConfiguration, solutionSCC, solutionBridges])
 
     // Graph key to make graph more static
-    const graphKey = useMemo(uuid, [graph, graphConfiguration, solution])
+    const graphKey = useMemo(uuid, [graph, graphConfiguration, (algorithm === 1) ? (solutionSCC) : (solutionBridges)])
 
     const options = {
         layout: {
