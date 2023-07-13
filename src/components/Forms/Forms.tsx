@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useRef } from "react";
 import UploadImage from '../../assets/upload.png'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -9,13 +9,13 @@ interface FormProps {
     algorithm: number;
     setAlgorithm : (value : number) => void;
     setConfigFile : (value : File) => void;
-    setMatrix : (value : string[][]) => void;
-    adjMatrix : string[][];
+    setGraphConfig : (value : [string, string[]][]) => void;
+    graphConfig : [string, string[]][];
     setSolution : (value : number[]) => void;
 }
 
 // Compression Forms Component
-const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, setMatrix, adjMatrix, setSolution }) => {
+const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, setGraphConfig, graphConfig, setSolution }) => {
     const textRef = useRef<HTMLParagraphElement>(null);
     const infoRef = useRef<HTMLParagraphElement>(null);
 
@@ -37,7 +37,7 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
 
             if (res.success) {
                 setConfigFile(file);
-                setMatrix(res.data);
+                setGraphConfig(res.data);
             } else {
                 toast.error(res.msg, {
                     position: toast.POSITION.TOP_RIGHT
@@ -67,19 +67,19 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
         e.preventDefault();
         setSolution([]);
 
-        if (adjMatrix) {
-            // Convert the adjMatrix into matrix of integer
-            // let adjacency = convertMatrixToIntegers(adjMatrix);
+        if (graphConfig) {
+            // Convert the graphConfig into matrix of integer
+            // let adjacency = convertMatrixToIntegers(graphConfig);
 
             // Do the algorithm
             if (algorithm === 1) {
                 // Do SCC
                 // let primMST = SCC(adjacency);
-                // primMST.length === adjMatrix.length - 1 ? setSolution(primMST) : setSolution(null);
+                // primMST.length === graphConfig.length - 1 ? setSolution(primMST) : setSolution(null);
             } else {
                 // Do Bridges
                 // let kruskalMST = Bridges(adjacency);
-                // kruskalMST.length === adjMatrix.length - 1 ? setSolution(kruskalMST) : setSolution(null);
+                // kruskalMST.length === graphConfig.length - 1 ? setSolution(kruskalMST) : setSolution(null);
             }
         } else {
             toast.error("You haven't load any .txt file, yet!", {
@@ -93,12 +93,12 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
         e.preventDefault();
         setSolution([]);
 
-        if (adjMatrix) {
-            // // Convert the adjMatrix into matrix of integer
-            // let adjacency = convertMatrixToIntegers(adjMatrix);
+        if (graphConfig) {
+            // // Convert the graphConfig into matrix of integer
+            // let adjacency = convertMatrixToIntegers(graphConfig);
             // // Do the algorithm
             // let kruskalMST = Bridges(adjacency);
-            // kruskalMST.length === adjMatrix.length - 1 ? setSolution(kruskalMST) : setSolution(null);
+            // kruskalMST.length === graphConfig.length - 1 ? setSolution(kruskalMST) : setSolution(null);
             // let [clustersRes, removed] = clusterMST(kruskalMST, adjacency, clusterNum);
 
             // // Handle result
@@ -112,43 +112,48 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
         }
     }
 
-    const isConfigFileValid = ({ lines }: { lines: string[] }): { success: boolean, msg: string, data?: string[][] } => {
+    const isConfigFileValid = ({ lines }: { lines: string[] }): { success: boolean, msg: string, data?: [string, string[]][] } => {
         if (!lines || lines.length === 0 || lines[0].length === 0) {
             return { success: false, msg: "Configuration file is empty!" };
         }
-      
-        const matrix = lines.map((line) => line.split(/\s+/));
-        const row = matrix.length;
-        const column = matrix[0].length;
-      
-        for (let i = 0; i < row; i++) {
-            const line = matrix[i];
-            if (line.length !== column) {
-                return { success: false, msg: "Configuration file contains rows with different lengths!" };
+    
+        const adjacencyList: [string, string[]][] = [];
+    
+        for (const line of lines) {
+            const nodes = line.trim().split(/\s+/);
+    
+            // Validate if the line has exactly two nodes
+            if (nodes.length !== 2) {
+                return { success: false, msg: "Invalid line in the configuration file!" };
             }
-        
-            for (let j = 0; j < column; j++) {
-                const stringValue = line[j];
-                if (!(/^\d+$/.test(stringValue))) {
-                    return { success: false, msg: "Configuration file contains invalid character(s)!\nPositive numbers are the only valid characters" };
-                }
+    
+            const [nodeA, nodeB] = nodes;
+    
+            // Validate if the nodes have exactly two characters
+            if (nodeA.length !== 1 || nodeB.length !== 1) {
+                return { success: false, msg: "Invalid node(s) in the configuration file!" };
             }
-        }
-      
-        if (row !== column) {
-            return { success: false, msg: "Adjacency matrix must have the same number of rows and columns!" };
-        }
-      
-        for (let j = 0; j < row; j++) {
-            for (let k = 0; k < column; k++) {
-                if (matrix[j][k] !== matrix[k][j]) {
-                    return { success: false, msg: "Adjacency matrix for an undirected graph should be symmetric!" };
-                }
+    
+            // Find the entry for nodeA in the adjacency list
+            const nodeEntry = adjacencyList.find(([node]) => node === nodeA);
+    
+            // Add the nodes to the adjacency list
+            if (nodeEntry) {
+                nodeEntry[1].push(nodeB);
+            } else {
+                adjacencyList.push([nodeA, [nodeB]]);
             }
         }
-      
-        return { success: true, msg: "Configuration File is valid", data: matrix };
-    };      
+    
+        // Validate if there are no isolated nodes
+        for (const [node, neighbors] of adjacencyList) {
+            if (neighbors.length === 0) {
+                return { success: false, msg: `Node ${node} is isolated and has no outgoing edges!` };
+            }
+        }
+    
+        return { success: true, msg: "Configuration File is valid", data: adjacencyList };
+    };              
 
     return (
         <main className="h-full">

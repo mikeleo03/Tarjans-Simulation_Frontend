@@ -4,12 +4,12 @@ import { v4 as uuid } from 'uuid';
 /* import { sortFirstAndSecond1, sortFirstAndSecond2 } from "../../helper/helper" */
 
 interface GraphSetProps {
-    adjacencyMatrix: string[][];
+    graphConfiguration: [string, string[]][];
     solution: number[];
 }
 
 interface Node {
-    id: number;
+    id: string;
     label: string;
     color: {
         background: string;
@@ -21,14 +21,14 @@ interface Node {
 }
 
 interface Edge {
-    from: number; 
-    to: number; 
-    arrows: { to: boolean; from: boolean; }; 
-    label: string; 
+    from: string; 
+    to: string; 
+    arrows: { to: boolean }; 
     physics: boolean; 
     color: { color: string; highlight: string; }; 
     labelHighlightBold: boolean; 
     selectionWidth: number;
+    smooth: {enabled: boolean, type: string, roundness: number}
 }
 
 interface GraphElement {
@@ -36,7 +36,7 @@ interface GraphElement {
     edges: Edge[];
 }
 
-const GraphSet: React.FC<GraphSetProps> = ({ adjacencyMatrix, solution }) => {
+const GraphSet: React.FC<GraphSetProps> = ({ graphConfiguration, solution }) => {
     // Basic screen configuration
     const [windowWidth, setWidth] = useState(window.innerWidth);
 
@@ -53,7 +53,7 @@ const GraphSet: React.FC<GraphSetProps> = ({ adjacencyMatrix, solution }) => {
     }, [windowWidth])
 
     // Grpah components
-    const nodeCount = adjacencyMatrix.length;
+    const nodeCount = graphConfiguration.length;
     const [graph, setGraph] = useState<GraphElement>({
         nodes: [],
         edges: []
@@ -69,8 +69,8 @@ const GraphSet: React.FC<GraphSetProps> = ({ adjacencyMatrix, solution }) => {
         for (var i = 0; i < nodeCount; i++) {
             // Graph element
             tempGraph.nodes.push({
-                id: i,
-                label: "Node " + (i+1),
+                id: graphConfiguration[i][0],
+                label: "Node " + graphConfiguration[i][0],
                 color: {
                     background: 'white',
                     border: "#5358e2",
@@ -81,86 +81,85 @@ const GraphSet: React.FC<GraphSetProps> = ({ adjacencyMatrix, solution }) => {
             })
 
             // Setup edge
-            for (var j = 0; j < nodeCount; j++) {
-                if (parseInt(adjacencyMatrix[i][j]) !== 0) {
-                    let tempEdge;
-                    if (solution) {
-                        tempEdge = {
-                            from: i,
-                            to: j,
-                            arrows: {
-                                to: false, from: false
-                            },
-                            label: adjacencyMatrix[i][j],
-                            physics: false,
-                            color: {
-                                color: "#feae33",
-                                highlight: "#feae33"
-                            },
-                            labelHighlightBold: true,
-                            selectionWidth: 0,
-                        }
-
-                        // Check the solution
-                        // let sortedAdj1 = sortFirstAndSecond1(solution);
-                        // for (let p = 0; p < sortedAdj1.length; p++) {
-                        //     if (sortedAdj1[p][0] == i && sortedAdj1[p][1] == j) {
-                        //         tempEdge.color.color = "#dc2626";
-                        //     }
-                        // }
-                        // let sortedAdj2 = sortFirstAndSecond2(solution);
-                        // for (let p = 0; p < sortedAdj2.length; p++) {
-                        //     if (sortedAdj2[p][0] == i && sortedAdj2[p][1] == j) {
-                        //         tempEdge.color.color = "#dc2626";
-                        //     }
-                        // }
-
-                        // if (clusterRemove) {
-                        //     let arrRemove = clusterRemove.map(obj => [obj.src, obj.dest, obj.weight]);
-                        //     // Check the clusterRemove
-                        //     let sortedCluster1 = sortFirstAndSecond1(arrRemove);
-                        //     for (let p = 0; p < sortedCluster1.length; p++) {
-                        //         if (sortedCluster1[p][0] == i && sortedCluster1[p][1] == j) {
-                        //             tempEdge.color.color = "#e2e8f0";
-                        //         }
-                        //     }
-                        //     let sortedCluster2 = sortFirstAndSecond2(arrRemove);
-                        //     for (let p = 0; p < sortedCluster2.length; p++) {
-                        //         if (sortedCluster2[p][0] == i && sortedCluster2[p][1] == j) {
-                        //             tempEdge.color.color = "#e2e8f0";
-                        //         }
-                        //     }
-                        // }
-
-                    } else {
-                        tempEdge = {
-                            from: i,
-                            to: j,
-                            arrows: {
-                                to: false, from: false
-                            },
-                            label: adjacencyMatrix[i][j],
-                            physics: false,
-                            color: {
-                                color: "#5358e2",
-                                highlight: "#5358e2"
-                            },
-                            labelHighlightBold: true,
-                            selectionWidth: 0,
-                        }
+            for (var j = 0; j < graphConfiguration[i][1].length; j++) {
+                console.log(graphConfiguration[i][0], graphConfiguration[i][1][j]);
+                let tempEdge;
+                if (solution.length !== 0) {
+                    tempEdge = {
+                        from: graphConfiguration[i][0],
+                        to: graphConfiguration[i][1][j],
+                        arrows: {
+                            to: true,
+                        },
+                        physics: false,
+                        color: {
+                            color: "#feae33",
+                            highlight: "#feae33"
+                        },
+                        labelHighlightBold: true,
+                        selectionWidth: 0,
+                        smooth: {enabled: true,  type: 'curvedCW', roundness: 0.25}
                     }
 
-                    tempGraph.edges.push(tempEdge);
+                    // Check the solution
+                    // let sortedAdj1 = sortFirstAndSecond1(solution);
+                    // for (let p = 0; p < sortedAdj1.length; p++) {
+                    //     if (sortedAdj1[p][0] == i && sortedAdj1[p][1] == j) {
+                    //         tempEdge.color.color = "#dc2626";
+                    //     }
+                    // }
+                    // let sortedAdj2 = sortFirstAndSecond2(solution);
+                    // for (let p = 0; p < sortedAdj2.length; p++) {
+                    //     if (sortedAdj2[p][0] == i && sortedAdj2[p][1] == j) {
+                    //         tempEdge.color.color = "#dc2626";
+                    //     }
+                    // }
+
+                    // if (clusterRemove) {
+                    //     let arrRemove = clusterRemove.map(obj => [obj.src, obj.dest, obj.weight]);
+                    //     // Check the clusterRemove
+                    //     let sortedCluster1 = sortFirstAndSecond1(arrRemove);
+                    //     for (let p = 0; p < sortedCluster1.length; p++) {
+                    //         if (sortedCluster1[p][0] == i && sortedCluster1[p][1] == j) {
+                    //             tempEdge.color.color = "#e2e8f0";
+                    //         }
+                    //     }
+                    //     let sortedCluster2 = sortFirstAndSecond2(arrRemove);
+                    //     for (let p = 0; p < sortedCluster2.length; p++) {
+                    //         if (sortedCluster2[p][0] == i && sortedCluster2[p][1] == j) {
+                    //             tempEdge.color.color = "#e2e8f0";
+                    //         }
+                    //     }
+                    // }
+
+                } else {
+                    tempEdge = {
+                        from: graphConfiguration[i][0],
+                        to: graphConfiguration[i][1][j],
+                        arrows: {
+                            to: true,
+                        },
+                        physics: false,
+                        color: {
+                            color: "#5358e2",
+                            highlight: "#5358e2"
+                        },
+                        labelHighlightBold: true,
+                        selectionWidth: 0,
+                        smooth: {enabled: true,  type: 'curvedCW', roundness: 0.25}
+                    }
                 }
+
+                tempGraph.edges.push(tempEdge);
             }
         }
         
         setGraph(tempGraph);
 
-    }, [adjacencyMatrix, solution])
+    }, [graphConfiguration, solution])
 
     // Graph key to make graph more static
-    const graphKey = useMemo(uuid, [graph, adjacencyMatrix, solution])
+    const graphKey = useMemo(uuid, [graph, graphConfiguration, solution])
 
     const options = {
         layout: {

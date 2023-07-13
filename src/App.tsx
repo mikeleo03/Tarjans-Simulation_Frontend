@@ -19,76 +19,92 @@ const backgroundStyle = {
 function App() {
     // Program states
     const [configFile, setConfigFile] = useState<File>();
-    const [adjMatrix, setMatrix] = useState<string[][]>([]);
+    const [graphConfig, setGraphConfig] = useState<[string, string[]][]>([]);
     const [solution, setSolution] = useState<number[]>([]);
     const [algorithm, setAlgorithm] = useState(1);
-    const [from, setFrom] = useState(0);
-    const [to, setTo] = useState(0);
-    const [weight, setWeight] = useState(1);
-    const [adjArray, setArray] = useState<number[]>([]);
+    const [fromAdd, setFromAdd] = useState(0);
+    const [toAdd, setToAdd] = useState(0);
+    const [fromDel, setFromDel] = useState(0);
+    const [toDel, setToDel] = useState(0);
+    const [adjArray, setArray] = useState<string[]>([]);
 
     // Update the adjArray
     useEffect(() => {
-        if (adjMatrix) {
+        if (graphConfig) {
             const newArray = [];
-            for (let i = 1; i <= adjMatrix.length; i++) {
-                newArray.push(i);
+            for (let i = 0; i < graphConfig.length; i++) {
+                newArray.push(graphConfig[i][0]);
             }
             setArray(newArray);
         }
-    }, [adjMatrix]);
+    }, [graphConfig]);
 
     // Handlers
-    const handleAddNode = (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        setSolution([]);
-
-        // Copy first
-        let newMatrix = [...adjMatrix];
-        // Instansiasi matriks elemen baru, baris matriks ketetanggaan
-        let newRow = [];
-        // Menambahkan elemen secara row-wise
-        for (var i = 0; i < newMatrix.length; i++) {
-            newMatrix[i].push('0');      // instansiasi tidak terhubung
-            newRow.push('0');            // Menambah row baru dengan elemen -1 semua sebanyak kolom
-        }
-        // Menambah elemen column-wise
-        newRow.push('0');             // Ingat, elemen baru pasti bertemu elemen baru
-        newMatrix.push(newRow);       // Menambahkan instansasi baris baru matriks ketetanggaan
-        // Reset
-        setMatrix(newMatrix);
-        toast.success("New node is added", {
-            position: toast.POSITION.TOP_RIGHT
-        });
-    }
-
     const handleAddEdge = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         setSolution([]);
 
-        // Copy first
-        let newMatrix = [...adjMatrix];
-        // Make sure nilainya belum ada
-        if (newMatrix[from][to] !== '0') {
-            toast.error("Edge already exist", {
+        // The mechanism
+        let edgeAlreadyExists = false;
+        for (const [node, neighbors] of graphConfig) {
+            if (node === adjArray[fromAdd] && neighbors.includes(adjArray[toAdd])) {
+                edgeAlreadyExists = true;
+                break;
+            }
+        }
+
+        if (edgeAlreadyExists) {
+            toast.error("Edge already exists", {
                 position: toast.POSITION.TOP_RIGHT
             });
-        } else if (from === to) {
-            toast.error("You can't add edges between the same node in undirected graph", {
-                position: toast.POSITION.TOP_RIGHT
-            });
-        } else {
-            // Set nilainya
-            newMatrix[from][to] = weight.toString();
-            // Set nilainya baru
-            newMatrix[to][from] = weight.toString();
-            // Reset
-            setMatrix(newMatrix);
-            toast.success("New edge is added", {
+        }  else {
+            // Find the entry for 'from' node in the adjacency list
+            const fromNode = graphConfig.find(([node]) => node === adjArray[fromAdd]);
+
+            // Add 'to' node to the adjacency list of 'from' node
+            if (fromNode) {
+                fromNode[1].push(adjArray[toAdd]);
+            } else {
+                graphConfig.push([adjArray[fromAdd], [adjArray[toAdd]]]);
+            }
+
+            toast.success("New edge added", {
                 position: toast.POSITION.TOP_RIGHT
             });
         }
+
+        // Reset the graph configuration
+        setGraphConfig([...graphConfig]);      
     }
+
+    const handleDeleteEdge = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        setSolution([]);
+      
+        // The mechanism
+        let edgeFound = false;
+        for (const [node, neighbors] of graphConfig) {
+            if (node === adjArray[fromDel] && neighbors.includes(adjArray[toDel])) {
+                const index = neighbors.indexOf(adjArray[toDel]);
+                neighbors.splice(index, 1);
+                edgeFound = true;
+                break;
+            }
+        }
+      
+        if (edgeFound) {
+            toast.success("Edge deleted", {
+                position: toast.POSITION.TOP_RIGHT
+            });
+        } else {
+            toast.error("Edge not found", {
+                position: toast.POSITION.TOP_RIGHT
+            });
+        }
+      
+        // Reset the graph configuration
+        setGraphConfig([...graphConfig]);
+    };      
 
     return (
         <div style={backgroundStyle} className="flex p-[1.5vh]">
@@ -101,57 +117,56 @@ function App() {
                                 <h1 className='text-3xl font-bold'>Graph</h1>
                                 <h3 className='text-xl py-1.5 font-semibold text-primaryBlue'>Based on input result</h3>
                             </div>
-                            {adjMatrix && 
+                            {graphConfig && 
                             <div className="w-2/3 flex flex-row gap-x-4 w-full">
-                                <div className="w-1/6 bg-primaryGray rounded-xl p-3 flex items-center">
-                                    <button className='px-4 py-1.5 text-sm text-white font-medium bg-primaryBlue hover:bg-indigo-400 active:bg-indigo-600 rounded-lg duration-150' onClick={(e) => handleAddNode(e)}>Add Node</button>
-                                </div>
-                                <div className="w-5/6 flex flex-row bg-primaryGray rounded-xl space-x-4 p-3">
+                                <div className="w-1/2 flex flex-row bg-primaryGray rounded-xl space-x-4 p-3">
                                     <div>
                                         <label className="font-medium">
                                             From
                                         </label>
-                                        <Dropdown menuItems={adjArray} selectedItem={from} setSelectedItem={setFrom} maxHeight={40} height={0}/>
+                                        <Dropdown menuItems={adjArray} selectedItem={fromAdd} setSelectedItem={setFromAdd} maxHeight={40} height={0}/>
                                     </div>
                                     <div>
                                         <label className="font-medium">
                                             To
                                         </label>
-                                        <Dropdown menuItems={adjArray} selectedItem={to} setSelectedItem={setTo} maxHeight={40} height={0}/>
+                                        <Dropdown menuItems={adjArray} selectedItem={toAdd} setSelectedItem={setToAdd} maxHeight={40} height={0}/>
                                     </div>
                                     <div className="flex items-center">
                                         <button className='px-4 py-1.5 text-sm text-white font-medium bg-primaryBlue hover:bg-indigo-400 active:bg-indigo-600 rounded-lg duration-150' onClick={(e) => handleAddEdge(e)}>Add Edge</button>
                                     </div>
+                                </div>
+                                <div className="w-1/2 flex flex-row bg-primaryGray rounded-xl space-x-4 p-3">
                                     <div>
                                         <label className="font-medium">
                                             From
                                         </label>
-                                        <Dropdown menuItems={adjArray} selectedItem={from} setSelectedItem={setFrom} maxHeight={40} height={0}/>
+                                        <Dropdown menuItems={adjArray} selectedItem={fromDel} setSelectedItem={setFromDel} maxHeight={40} height={0}/>
                                     </div>
                                     <div>
                                         <label className="font-medium">
                                             To
                                         </label>
-                                        <Dropdown menuItems={adjArray} selectedItem={to} setSelectedItem={setTo} maxHeight={40} height={0}/>
+                                        <Dropdown menuItems={adjArray} selectedItem={toDel} setSelectedItem={setToDel} maxHeight={40} height={0}/>
                                     </div>
                                     <div className="flex items-center">
-                                        <button className='px-4 py-1.5 text-sm text-white font-medium bg-primaryBlue hover:bg-indigo-400 active:bg-indigo-600 rounded-lg duration-150' onClick={(e) => handleAddEdge(e)}>Delete Edge</button>
+                                        <button className='px-4 py-1.5 text-sm text-white font-medium bg-primaryBlue hover:bg-indigo-400 active:bg-indigo-600 rounded-lg duration-150' onClick={(e) => handleDeleteEdge(e)}>Delete Edge</button>
                                     </div>
                                 </div>
                             </div>}
                         </div>
                         <div className='h-5/6 p-5 rounded-lg bg-gray-200 flex flex-row w-full space-x-5'>
                             <div className='w-4/5'>
-                                {(configFile && adjMatrix) ? (<GraphSet adjacencyMatrix={adjMatrix} solution={solution} />) : (<div className="flex items-center justify-center h-full bg-gray-100 rounded-xl text-l">No file loaded.</div>)}
+                                {(configFile && graphConfig) ? (<GraphSet graphConfiguration={graphConfig} solution={solution} />) : (<div className="flex items-center justify-center h-full bg-gray-100 rounded-xl text-l">No file loaded.</div>)}
                             </div>
                             <div className='w-1/5 h-full'>
                                 <h1 className='text-xl font-bold'>Result</h1>
                                 {(algorithm === 1) ? (
                                     <>
-                                        {/* <h3>Total Weight : {(solution && solution.length === adjMatrix.length - 1) && (calculateTotalWeight(solution))}</h3> */}
+                                        {/* <h3>Total Weight : {(solution && solution.length === graphConfig.length - 1) && (calculateTotalWeight(solution))}</h3> */}
                                         <h3>List of SCC</h3>
                                         {/* <div>
-                                            {(solution && solution.length === adjMatrix.length - 1) ? (
+                                            {(solution && solution.length === graphConfig.length - 1) ? (
                                                 solution.map((obj, index) => (
                                                     <div className="text-base" key={index}>
                                                         Node {obj[0] + 1} - Node {obj[1] + 1} ({obj[2]})
@@ -178,7 +193,7 @@ function App() {
                         </div>
                     </div>
                     <div className="text-left flex flex-col w-1/4 p-8 bg-primaryGray rounded-r-xl">
-                        <Form algorithm={algorithm} setAlgorithm={setAlgorithm} setConfigFile={setConfigFile} setMatrix={setMatrix} adjMatrix={adjMatrix} setSolution={setSolution} />
+                        <Form algorithm={algorithm} setAlgorithm={setAlgorithm} setConfigFile={setConfigFile} setGraphConfig={setGraphConfig} graphConfig={graphConfig} setSolution={setSolution} />
                     </div>
                 </div>
             </div>
