@@ -32,11 +32,15 @@ function App() {
     // Update the adjArray
     useEffect(() => {
         if (graphConfig) {
-            const newArray = [];
+            const newArray : string[] = [];
             for (let i = 0; i < graphConfig.length; i++) {
-                newArray.push(graphConfig[i][0]);
+                for (let j = 0; j < graphConfig[i][1].length; j++) {
+                    if (!newArray.includes(graphConfig[i][1][j])) {
+                        newArray.push(graphConfig[i][1][j]);
+                    }
+                }
             }
-            setArray(newArray);
+            setArray(newArray.sort());
         }
     }, [graphConfig]);
 
@@ -45,6 +49,7 @@ function App() {
         event.preventDefault();
         setSolutionSCC([]);
         setSolutionBridges([]);
+        setTime(-1);
 
         // The mechanism
         let edgeAlreadyExists = false;
@@ -83,6 +88,7 @@ function App() {
         event.preventDefault();
         setSolutionSCC([]);
         setSolutionBridges([]);
+        setTime(-1);
       
         // The mechanism
         let edgeFound = false;
@@ -160,13 +166,12 @@ function App() {
                         </div>
                         <div className='h-5/6 p-5 rounded-lg bg-gray-200 flex flex-row w-full space-x-5'>
                             <div className='w-4/5'>
-                                {(configFile && graphConfig) ? (<GraphSet graphConfiguration={graphConfig} solutionSCC={solutionSCC} solutionBridges={solutionBridges} algorithm={algorithm} />) : (<div className="flex items-center justify-center h-full bg-gray-100 rounded-xl text-l">No file loaded.</div>)}
+                                {(configFile && graphConfig) ? (<GraphSet graphConfiguration={graphConfig} solutionSCC={solutionSCC} solutionBridges={solutionBridges} algorithm={algorithm} length={adjArray.length} />) : (<div className="flex items-center justify-center h-full bg-gray-100 rounded-xl text-l">No file loaded.</div>)}
                             </div>
                             <div className='w-1/5 h-full'>
                                 <h1 className='text-xl font-bold'>Result</h1>
                                 {(algorithm === 1) ? (
                                     <>
-                                        {/* <h3>Total Weight : {(solution && solution.length === graphConfig.length - 1) && (calculateTotalWeight(solution))}</h3> */}
                                         <h3>List of SCC</h3>
                                         <h3>Execution time : </h3>
                                         <h3>{(algorithm === 1 && time !== - 1) ? (time) : ("-")} ns</h3>
@@ -185,15 +190,15 @@ function App() {
                                         <h3>List of Bridges</h3>
                                         <h3>Execution time : </h3>
                                         <h3>{(algorithm === 2 && time !== - 1) ? (time) : ("-")} ns</h3>
-                                        {/* <div>
-                                            {(clusters && clusters.length === clusterNum) ? (
-                                                clusters.map((obj, index) => (
+                                        <div>
+                                            {(solutionBridges) ? (
+                                                solutionBridges.map((obj, index) => (
                                                     <div className="text-base" key={index}>
-                                                        Cluster-{index + 1} : {obj.join(', ')}
+                                                        Bridge-{index + 1} : {obj[0]} - {obj[1]}
                                                     </div>
-                                            ))
-                                            ) : (<div className="text-base">No solution</div>)}
-                                        </div> */}
+                                            )
+                                            )) : (<div className="text-base">No solution</div>)}
+                                        </div>
                                     </>
                                 )}
                             </div>

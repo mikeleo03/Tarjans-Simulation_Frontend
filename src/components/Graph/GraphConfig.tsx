@@ -1,12 +1,14 @@
 import Graph from "react-graph-vis";
 import { useState, useMemo, useEffect } from "react";
 import { v4 as uuid } from 'uuid';
+import addMissingPairs from '../../helper/helper';
 
 interface GraphSetProps {
     graphConfiguration: [string, string[]][];
     solutionSCC: string[][];
     solutionBridges: string[][];
     algorithm: number;
+    length: number;
 }
 
 interface Node {
@@ -37,7 +39,7 @@ interface GraphElement {
     edges: Edge[];
 }
 
-const GraphSet: React.FC<GraphSetProps> = ({ graphConfiguration, solutionSCC, solutionBridges, algorithm }) => {
+const GraphSet: React.FC<GraphSetProps> = ({ graphConfiguration, solutionSCC, solutionBridges, algorithm, length }) => {
     // Basic screen configuration
     const [windowWidth, setWidth] = useState(window.innerWidth);
 
@@ -105,7 +107,7 @@ const GraphSet: React.FC<GraphSetProps> = ({ graphConfiguration, solutionSCC, so
                 }
             }
         } else if (solutionSCC.length !== 0) {
-            let colorlist = ["#ce76fe", "#ed6f71", "#feae33", "#5358e2", "#f5f7fb"];
+            let colorlist = ["#ce76fe", "#ed6f71", "#feae33", "#5358e2", "#fec46b"];
 
             // Nodes
             for (var i = 0; i < solutionSCC.length; i++) {
@@ -144,6 +146,60 @@ const GraphSet: React.FC<GraphSetProps> = ({ graphConfiguration, solutionSCC, so
                         labelHighlightBold: true,
                         selectionWidth: 0,
                         smooth: {enabled: true,  type: 'curvedCW', roundness: 0.25}
+                    }
+
+                    tempGraph.edges.push(tempEdge);
+                }
+            }
+        } else if (solutionBridges.length !== 0) {
+            // Capture a complete pairs for edge coloring
+            const pairList = addMissingPairs(solutionBridges);
+
+            for (var i = 0; i < nodeCount; i++) {
+                // Check its coresponding
+                let secondEl;
+                let paired = false;
+                for (const pair of pairList) {
+                    const [first, second] = pair;
+                
+                    // Check if the character exists in the first element of the pair
+                    if (first === graphConfiguration[i][0]) {
+                        secondEl = second;
+                        paired = true;
+                        break;
+                    }
+                }
+
+                // Graph element
+                tempGraph.nodes.push({
+                    id: graphConfiguration[i][0],
+                    label: "Node " + graphConfiguration[i][0],
+                    color: {
+                        background: paired ? "#ed6f71" : '#feae33',
+                        border: paired ? "#ed6f71" : '#feae33',
+                        highlight: paired ? "#ed6f71" : '#feae33'
+                    },
+                    labelHighlightBold: false,
+                    shape: "circle",
+                })
+
+                // Setup edge
+                let tempEdge : Edge;
+                for (var j = 0; j < graphConfiguration[i][1].length; j++) {
+                    tempEdge = {
+                        from: graphConfiguration[i][0],
+                        to: graphConfiguration[i][1][j],
+                        arrows: {
+                            to: false,
+                        },
+                        physics: false,
+                        color: {
+                            color: graphConfiguration[i][1][j] === secondEl ? "black" : "#feae33",
+                            highlight: graphConfiguration[i][1][j] === secondEl ? "black" : "#feae33"
+                        },
+                        labelHighlightBold: true,
+                        selectionWidth: 0,
+                        smooth: {enabled: false,  type: '', roundness: 0}
                     }
 
                     tempGraph.edges.push(tempEdge);

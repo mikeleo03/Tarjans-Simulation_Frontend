@@ -26,6 +26,7 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
         e.preventDefault();
         setSolutionSCC([]);
         setSolutionBridges([]);
+        setTime(-1);
         const file = e.target.files?.[0];
 
         if (file) {
@@ -41,6 +42,29 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
 
             if (res.success) {
                 setConfigFile(file);
+                // Now have res.data find the unconnected
+                // Find disconnected nodes
+                const existingNodes = new Set<string>();
+                let disconnectedNode: string[] = [];
+
+                // Iterate over the res.data to find disconnected node
+                res.data.forEach(([node, connections]: [string, string[]]) => {
+                    existingNodes.add(node);
+                    connections.forEach(connection => {
+                        existingNodes.add(connection);
+                    });
+                });
+
+                // Find disconnected node
+                existingNodes.forEach(node => {
+                    if (!res.data.some(([existingNode, _] : [string, string[]]) => existingNode === node)) {
+                        disconnectedNode.push(node);
+                    }
+                });
+
+                disconnectedNode.forEach(node => {
+                    res.data.push([node, []]);
+                });
                 setGraphConfig(res.data);
             } else {
                 toast.error(res.msg, {
@@ -71,17 +95,20 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
         event.preventDefault();
         setSolutionSCC([]);
         setSolutionBridges([]);
+        setTime(-1);
 
         if (graphConfig) {
             try {
-                if (algorithm === 1) {
-                    const convertedEdges: { [key: string]: string[] } = {};
-                    graphConfig.forEach(edge => {
-                        const sourceNode = edge[0];
-                        const targetNodes = edge[1];
-                        convertedEdges[sourceNode] = targetNodes;
-                    });
+                // Converting edges into map
+                const convertedEdges: { [key: string]: string[] } = {};
+                graphConfig.forEach(edge => {
+                    const sourceNode = edge[0];
+                    const targetNodes = edge[1];
+                    convertedEdges[sourceNode] = targetNodes;
+                });
 
+                // Algorithm processing
+                if (algorithm === 1) {
                     // Proses SCC
                     fetch(url + "/api/scc", {
                         method: "POST",
@@ -96,13 +123,12 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
                     .then((res) => res.json())
                     .then((data) => {
                         // Update state              
-                        if (data.status === false) {
+                        if (!data.status) {
                             toast.error(data.msg, {
                                 position: toast.POSITION.TOP_RIGHT
                             });
                         } else {
                             // Value retriving
-                            console.log(data);
                             setSolutionSCC(data.value);
                             data.time ? setTime(data.time) : setTime(0);
                         }
@@ -116,19 +142,21 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
                         },
                         body: JSON.stringify({
                             "nodes": adjArray,
-                            "edges": graphConfig,
+                            "edges": convertedEdges,
                         }),
                     })
                     .then((res) => res.json())
                     .then((data) => {
                         // Update state              
-                        if (data.status === false) {
+                        if (!data.status) {
                             toast.error(data.msg, {
                                 position: toast.POSITION.TOP_RIGHT
                             });
+                        } else {
+                            // Value retriving
+                            setSolutionBridges(data.value);
+                            data.time ? setTime(data.time) : setTime(0);
                         }
-                        
-                        setSolutionBridges(data.value);
                     });
                 }
 
@@ -233,11 +261,11 @@ const Forms: React.FC<FormProps> = ({ algorithm, setAlgorithm, setConfigFile, se
                             </label>
                             <div className="flex flex-col mt-2 grid grid-cols-2 space-x-2 rounded-lg bg-secondaryYellow p-1.5">
                                 <div>
-                                    <input type="radio" id="SCC" name="SCC" value="SCC" checked={algorithm === 1} onChange={() => {setAlgorithm(1); setSolutionSCC([]); setSolutionBridges([]);}} className="peer hidden"></input>
+                                    <input type="radio" id="SCC" name="SCC" value="SCC" checked={algorithm === 1} onChange={() => {setAlgorithm(1); setSolutionSCC([]); setSolutionBridges([]); setTime(-1);}} className="peer hidden"></input>
                                     <label htmlFor="SCC" className="text-sm block cursor-pointer select-none rounded-xl p-2 text-center peer-checked:bg-primaryBlue font-bold peer-checked:text-white h-full flex justify-center items-center">SCC</label>
                                 </div>
                                 <div>
-                                    <input type="radio" id="Bridges" name="Bridges" value="Bridges" checked={algorithm === 2} onChange={() => {setAlgorithm(2); setSolutionSCC([]); setSolutionBridges([]);}} className="peer hidden"></input>
+                                    <input type="radio" id="Bridges" name="Bridges" value="Bridges" checked={algorithm === 2} onChange={() => {setAlgorithm(2); setSolutionSCC([]); setSolutionBridges([]); setTime(-1);}} className="peer hidden"></input>
                                     <label htmlFor="Bridges" className="text-sm block cursor-pointer select-none rounded-xl p-2 text-center peer-checked:bg-primaryBlue font-bold peer-checked:text-white h-full flex justify-center items-center">Bridges</label>
                                 </div>
                             </div>
