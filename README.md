@@ -1,46 +1,96 @@
-# Getting Started with Create React App
+# 🕸 Tarjans Algorithm Simulation
+> Frontend side of SCC and Bridges Finder using Tarjans Algorithm with React Typescript and Golang
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## General Information
+This program is created to find s Strongly Connected Component (SCC) on a directed Graph and Bridges on a undirected graph based on user input. The program will proceed a.txt file which containt directed adjacency lists to interpret a graph, then find the SCC and Bridges using popular SCC algorithm, Tarjans. User can also modify the graph by adding and deleting edges by filling the form. The program also provide a good graph and edge coloring to make a better undersanding about the results. Furthermore, the project information is also provided for future improvements.
+
+## Project Structure
+```bash
+.
+├─── img
+├─── public
+│   ├─── index.html
+│   ├─── manifext.json
+│   └─── robots.txt
+├─── src
+│   ├─── assets
+│   │   └─── upload.png
+│   ├─── components
+│   │   ├─── Dropdown
+│   │   │   └─── Dropdown.tsx
+│   │   ├─── Forms
+│   │   │   └─── Forms.tsx
+│   │   └─── Graph
+│   │       └─── GraphConfig.tsx
+│   ├─── helper
+│   │   └─── helper.tsx
+│   ├─── App.css
+│   ├─── App.tsx
+│   ├─── index.css
+│   ├─── index.tsx
+│   ├─── react-app-env.d.ts
+│   └─── react-graph-vis.d.ts
+├─── test
+│   ├─── test1.txt
+│   ├─── test2.txt
+│   ├─── test3.txt
+│   ├─── test4.txt
+│   └─── test5.txt
+├─── .env.example
+├─── .gitignore
+├─── package-lock.json
+├─── package.json
+├─── postcss.config.js
+├─── README.md
+├─── tailwind.config.js
+└─── tsconfig.js
+```
+
+## Prerequisites
+- node.js (v 18.12.1)
+- npm (v 8.19.2)
+- React (v 18.2.0)
+- Tailwind (v 3.3.2) for styling
+- react-graph-vis (v 1.0.7) for graph illustrating
+- react-toastify (v 9.1.3) for modals on error and success
+
+## Algorithms
+Algorithm implemented on backend side. Further explanation and implementation of Tarjans Algorithm stated on [this repository](https://github.com/mikeleo03/Tarjans-Algorithm-Simulation_Backend)
+
+## How to Compile and Run the Program
+Clone this repository from terminal with this command
+``` bash
+$ git clone https://github.com/mikeleo03/Tarjans-Algorithm-Simulation_Frontend.git
+```
+### Run the application on development server
+Compile and download some required modules by running the following *command*
+``` bash
+$ npm install
+$ npm start
+```
+If you do it correctly, the pogram should be running on localhost:3000
+
+## How to Use the Program
+1. Go to the website with the procedure explained before.
+2. Insert a .txt file in the box provided on the form side to initiate a graph. The program also will give error messages if the input file is not well-formatted. If the input is valid, the graph of your input will be loaded in the left side with some additional buttons.
+3. Explore the whole feature! You can add and delete edges and you can select the process then proceed to find the SCC or the bridges as you wanted to.
+Get to know more about the website interface by looking at the screenshots down below.
 
 ## Available Scripts
-
 In the project directory, you can run:
 
 ### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Ths runs the app in the development mode.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+The page will reload if you make edits.<br />
+You will also see any lint errors in the console. You can also use the environment by appyling the basic .env configuration on .env.example file.
 
-### `npm test`
+## Screenshots
+![demo1](img/Screenshot1.PNG)
+![demo2](img/Screenshot2.PNG)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Contributors
+<a href = "https://github.com/mikeleo03/markdown-editor/graphs/contributors">
+  <img src = "https://contrib.rocks/image?repo=mikeleo03/markdown-editor"/>
+</a>
