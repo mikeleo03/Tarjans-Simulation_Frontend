@@ -71,7 +71,7 @@ $ npm start
 If you do it correctly, the pogram should be running on localhost:3000. Don't forget to run the backend side also. Further explanation on how to run the backend development server stated on [this repository](https://github.com/mikeleo03/Tarjans-Algorithm-Simulation_Backend)
 
 ### Run the application from deployed website
-You can also run the whole program by clicking this [deployment link](tarjans-simulation-frontend.vercel.app)
+You can also run the whole program by clicking this [deployment link](https://tarjans-simulation-frontend.vercel.app)
 
 ## How to Use the Program
 1. Go to the website with the procedure explained before.
