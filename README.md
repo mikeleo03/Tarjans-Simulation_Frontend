@@ -70,6 +70,9 @@ $ npm start
 ```
 If you do it correctly, the pogram should be running on localhost:3000. Don't forget to run the backend side also. Further explanation on how to run the backend development server stated on [this repository](https://github.com/mikeleo03/Tarjans-Algorithm-Simulation_Backend)
 
+### Run the application from deployed website
+You can also run the whole program by clicking this [deployment link](tarjans-simulation-frontend.vercel.app)
+
 ## How to Use the Program
 1. Go to the website with the procedure explained before.
 2. Insert a .txt file in the box provided on the form side to initiate a graph. The program also will give error messages if the input file is not well-formatted. If the input is valid, the graph of your input will be loaded in the left side with some additional buttons.
