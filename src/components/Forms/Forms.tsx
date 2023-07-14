@@ -3,7 +3,7 @@ import UploadImage from '../../assets/upload.png'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const url = process.env.REACT_APP_BACKEND_URL_DEV;
+const url = process.env.REACT_APP_BACKEND_URL;
 
 interface FormProps {
     algorithm: number;
